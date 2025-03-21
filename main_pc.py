@@ -29,6 +29,11 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
         self.loop = False
         self.sourceFileName = ''
+        self.debounceTimer = QtCore.QTimer(self)
+        self.debounceTimer.setSingleShot(True)
+        self.debounceTimer.timeout.connect(self.handleDebouncedRelease)
+        self.releasePending = False
+
         self.setMinimumSize(QtCore.QSize(800, 640))
         self.setWindowTitle('Просмотр файлов')
         self.showFullScreen()
@@ -129,10 +134,18 @@ class MainWindow(QtWidgets.QMainWindow):
         print(f"Отпущена клавиша: {key}")
 
         if key == KEY_STARTPOZNAVATVIDEO and not trig:
+            self.releasePending = True
+            self.debounceTimer.start(200)  # 200 мс задержки
+
+
+    
+    def handleDebouncedRelease(self):
+        global trig
+        if self.releasePending:
+            print("Дребезг прошёл, выполняем остановку видео")
             trig = True
-            self.mediaStop()       # Останавливаем видео
-
-
+            self.mediaStop()
+            self.releasePending = False
             
     def showAnimation(self):
         self.mediaStop()
