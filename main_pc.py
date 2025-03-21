@@ -54,6 +54,11 @@ class MainWindow(QtWidgets.QMainWindow):
         # Настройка видеоплеера
         self.mediaPlayer = QtMultimedia.QMediaPlayer()
         self.audioOutput = QtMultimedia.QAudioOutput()
+        self.audioOutput = QtMultimedia.QAudioOutput()
+
+
+
+
         self.mediaPlayer.setAudioOutput(self.audioOutput)
 
         self.videoWidget = QtMultimediaWidgets.QVideoWidget(self)
@@ -93,21 +98,42 @@ class MainWindow(QtWidgets.QMainWindow):
     def keyPressEvent(self, event):
         global trig
         key = event.key()
+        if event.isAutoRepeat():
+            return  # Игнорируем автоповтор
         print(f"Нажата клавиша: {key}")  # Логирование клавиши
-        if key == KEY_STARTPOZNAVATVIDEO:
+
+        if key == KEY_STARTPOZNAVATVIDEO and trig:
+            trig = False
             self.useItem(FILENAME, True)
-        elif key == KEY_STARTSOBRANIEVIDEO and trig:
-            trig=False
+
+        elif key == KEY_STARTSOBRANIEVIDEO:
             self.useItem(FILENAME1, True)
+
         elif key == KEY_ARDLOGOVIDEO:
             self.showAnimation()  # Показываем анимацию
+
         elif key == KEY_ARDSTARTVIDEO:
             self.useItem(FILENAME3, True)
+
         elif key == KEY_ARDSTOPVIDEO:
             trig = True
-            self.mediaStop()  # Останавливаем видео
+            self.mediaStop()       # Останавливаем видео
             self.logoMovie.stop()  # Останавливаем анимацию
+            
+    def keyReleaseEvent(self, event):
+        global trig
+        if event.isAutoRepeat():
+            return  # Игнорируем автоповтор
 
+        key = event.key()
+        print(f"Отпущена клавиша: {key}")
+
+        if key == KEY_STARTPOZNAVATVIDEO and not trig:
+            trig = True
+            self.mediaStop()       # Останавливаем видео
+
+
+            
     def showAnimation(self):
         self.mediaStop()
         self.mainLayout.setCurrentWidget(self.logoAnimation)  # Переключаемся на анимацию
